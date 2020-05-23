@@ -1,0 +1,102 @@
+---
+title: "ONS Automatic Scrape and Visualiser"
+author: "Fergus O'Loan"
+date: "22/05/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Remember to put in library calls and install packages
+
+
+```{r}
+library(httr)
+library(tidyRSS)
+library(jsonlite)
+library(rvest)
+library(stringr)
+library(rlist)
+library(tidyverse)
+
+url <- "www.ons.gov.uk/releasecalendar?rss"
+
+RSScollected <- tidyfeed(url)
+
+
+RSSCollectedSelect <- RSScollected %>% 
+  select(item_pub_date, item_title, item_link)
+
+
+#Worked on these two steps seperately; find some way of feeding 
+
+testpages <- RSSCollectedSelect$item_link
+
+mydata <- lapply(testpages, function(file) {
+  read_html(file) %>% 
+  html_nodes (".tiles__title-h3") %>%
+  html_nodes ("a") %>%
+  html_attr("href")
+})
+
+
+
+unlisted <- unlist(mydata)
+
+
+datasets <- unlisted[grepl("datasets", unlisted)]
+
+
+link <- paste("ons.gov.uk",datasets, sep = "",collapse = NULL)
+
+
+print(link)
+```
+
+url <- "www.ons.gov.uk/releasecalendar?rss"
+
+RSScollected <- tidyfeed(url)
+
+RSSCollectedSelect <- RSScollected %>% 
+  select(item_pub_date, item_title, item_link)
+  
+
+
+#Worked on these two steps seperately; find some way of feeding 
+
+testpages <- RSSCollectedSelect$item_link %>%
+  map(read_html) %>%
+  map(html_nodes (".tiles__title-h3")) %>%
+  map(html_nodes ("a")) %>%
+  map(html_attr("href"))
+
+
+
+testpages <-"https://www.ons.gov.uk/releases/migrationstatisticsquarterlyreportmay2020"
+
+link <- paste("ons.gov.uk",BulletinsRemoved, sep = "",collapse = NULL)
+
+
+testpages <- RSSCollectedSelect$item_link
+
+
+
+mydata <- lapply(testpages, function(file) {
+  read_html(file) %>% 
+  html_nodes (".tiles__title-h3") %>%
+  html_nodes ("a") %>%
+  html_attr("href")
+})
+
+
+unlisted <- unlist(mydata)
+
+
+datasets <- unlisted[grepl("datasets", unlisted)]
+
+link <- paste("ons.gov.uk",datasets, sep = "",collapse = NULL)
+
+print(link)
+
