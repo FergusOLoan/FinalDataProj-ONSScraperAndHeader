@@ -41,7 +41,7 @@ mydata <- lapply(testpages, function(file) {
   html_attr("href")
 })
 
-
+#need to unlist data to apply the paste properly, and for functions later
 
 unlisted <- unlist(mydata)
 
@@ -49,54 +49,30 @@ unlisted <- unlist(mydata)
 datasets <- unlisted[grepl("datasets", unlisted)]
 
 
-link <- paste("ons.gov.uk",datasets, sep = "",collapse = NULL)
+link <- paste("https://www.ons.gov.uk",datasets, sep = "",collapse = NULL)
 
+#don't be dumb, https:// needed to register as html
 
-print(link)
-```
-
-url <- "www.ons.gov.uk/releasecalendar?rss"
-
-RSScollected <- tidyfeed(url)
-
-RSSCollectedSelect <- RSScollected %>% 
-  select(item_pub_date, item_title, item_link)
-  
-
-
-#Worked on these two steps seperately; find some way of feeding 
-
-testpages <- RSSCollectedSelect$item_link %>%
-  map(read_html) %>%
-  map(html_nodes (".tiles__title-h3")) %>%
-  map(html_nodes ("a")) %>%
-  map(html_attr("href"))
-
-
-
-testpages <-"https://www.ons.gov.uk/releases/migrationstatisticsquarterlyreportmay2020"
-
-link <- paste("ons.gov.uk",BulletinsRemoved, sep = "",collapse = NULL)
-
-
-testpages <- RSSCollectedSelect$item_link
-
-
-
-mydata <- lapply(testpages, function(file) {
-  read_html(file) %>% 
-  html_nodes (".tiles__title-h3") %>%
+RollTruDatasets <- lapply(link, function(link) {
+  read_html(link) %>% 
+  html_nodes (".border-bottom--abbey-lg") %>%
   html_nodes ("a") %>%
   html_attr("href")
 })
 
 
-unlisted <- unlist(mydata)
+TruDatasets <- unlist(RollTruDatasets)
+
+Dls <- TruDatasets[grepl(".xls", TruDatasets)]
+
+Downloads <- paste("https://www.ons.gov.uk",Dls, sep = "",collapse = NULL)
+
+Downloads
+
+GET(Downloads[1], write_disk(tf <- tempfile(fileext = ".xlsx")))
+df <- read_xlsx(tf)
+df
+```
 
 
-datasets <- unlisted[grepl("datasets", unlisted)]
-
-link <- paste("ons.gov.uk",datasets, sep = "",collapse = NULL)
-
-print(link)
 
